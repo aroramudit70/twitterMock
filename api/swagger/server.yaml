@@ -1,0 +1,254 @@
+swagger: "2.0"
+info:
+  description: "Mock of twitter for Squareboat assignment"
+  version: "1.0.0"
+  title: "TwitterMock"
+  contact:
+    email: "aroramudit70@gmail.com"
+host: "192.168.1.233"
+basePath: "/mock"
+tags:
+- name: "user"
+  description: "Authorization of users"
+- name: "Operation"
+  description: "Tweet Operations"
+schemes:
+- "http"
+paths:
+  /tweet:
+    post:
+      tags:
+      - "Operation"
+      summary: "Tweet about anything"
+      description: "Feature allows the user to express their emotions and thoughts about anything and everything within 240 words"
+      operationId: "postTweet"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Post your tweet"
+        required: true
+        schema:
+          $ref: "#/definitions/Tweet"
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            type: string
+        "400":
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+  /feed:
+    get:
+      tags:
+      - "Operation"
+      summary: "Get Feed of your users you are following"
+      description: "Hear what everyone you are following wants to say"
+      operationId: "getFeed"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        type: string
+        name: "userName"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Feed"
+        "400":
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "404":
+          description: "Not Found"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+  /follow/{userHandle}:
+    get:
+      tags:
+      - "Operation"
+      summary: "Follow other users"
+      description: "Follow other users to increase your social group"
+      operationId: "follow"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        type: string
+        name: "userName"
+        required: true
+      - in: "path"
+        type: string
+        name: userHandle
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            type: string
+        "400":
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "404":
+          description: "Not Found"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+  /user/signup:
+    post:
+      tags:
+      - "user"
+      summary: "SignUp to our mock twitter"
+      description: "Get you account with us in our mock twitter platform"
+      operationId: "signup"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Post your tweet"
+        required: true
+        schema:
+          $ref: "#/definitions/Profile"
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            type: string
+        "400":
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+  /user/login:
+    get:
+      tags:
+      - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        "404":
+          description: "Not Found"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrResponse"
+  /user/logout:
+    get:
+      tags:
+      - "user"
+      summary: "Logs out current logged in user session"
+      description: ""
+      operationId: "logoutUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters: []
+      responses:
+        default:
+          description: "successful operation"
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Profile:
+    type: object
+    required:
+      - userName
+      - name
+      - password
+    properties:
+      name:
+        type: string
+      userName:
+        type: string
+        description: "Unique Name to indentify a user. Also termed as handle"
+      emailId:
+        type: string
+        example: "abx@xyz.com"
+      password:
+        type: string
+      followingList:
+        type: array
+        readOnly: true
+        items:
+          type: string
+  Tweet:
+    type: object
+    properties:
+      userName:
+        type: string
+        readOnly: true
+      tweet:
+        type: string
+        maxLength: 280
+  ErrResponse:
+    type: object
+    properties:
+      Code: 
+        type: string
+      Message:
+        type: string
+  
+  Feed:
+    type: array
+    items: 
+      $ref: "#/definitions/Tweet"
