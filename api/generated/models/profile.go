@@ -27,6 +27,10 @@ type Profile struct {
 	// Read Only: true
 	FollowingList []string `json:"followingList"`
 
+	// logged in
+	// Read Only: true
+	LoggedIn *bool `json:"loggedIn,omitempty"`
+
 	// name
 	// Required: true
 	Name *string `json:"name"`
@@ -97,6 +101,10 @@ func (m *Profile) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 		res = append(res, err)
 	}
 
+	if err := m.contextValidateLoggedIn(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -106,6 +114,15 @@ func (m *Profile) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 func (m *Profile) contextValidateFollowingList(ctx context.Context, formats strfmt.Registry) error {
 
 	if err := validate.ReadOnly(ctx, "followingList", "body", []string(m.FollowingList)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Profile) contextValidateLoggedIn(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "loggedIn", "body", m.LoggedIn); err != nil {
 		return err
 	}
 

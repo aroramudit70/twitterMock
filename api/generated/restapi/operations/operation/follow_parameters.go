@@ -11,7 +11,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/validate"
 )
 
 // NewFollowParams creates a new FollowParams object
@@ -36,11 +35,6 @@ type FollowParams struct {
 	  In: path
 	*/
 	UserHandle string
-	/*
-	  Required: true
-	  In: header
-	*/
-	UserName string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -54,10 +48,6 @@ func (o *FollowParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	rUserHandle, rhkUserHandle, _ := route.Params.GetOK("userHandle")
 	if err := o.bindUserHandle(rUserHandle, rhkUserHandle, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.bindUserName(r.Header[http.CanonicalHeaderKey("userName")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -76,26 +66,6 @@ func (o *FollowParams) bindUserHandle(rawData []string, hasKey bool, formats str
 	// Required: true
 	// Parameter is provided by construction from the route
 	o.UserHandle = raw
-
-	return nil
-}
-
-// bindUserName binds and validates parameter UserName from header.
-func (o *FollowParams) bindUserName(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("userName", "header", rawData)
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-
-	if err := validate.RequiredString("userName", "header", raw); err != nil {
-		return err
-	}
-	o.UserName = raw
 
 	return nil
 }

@@ -38,15 +38,27 @@ func configureAPI(api *operations.TwitterMockAPI) http.Handler {
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
-	api.XMLProducer = runtime.XMLProducer()
+
+	// Applies when the "Authorization" header is set
+	if api.BearerAuth == nil {
+		api.BearerAuth = func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		}
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
 
 	if api.OperationFollowHandler == nil {
-		api.OperationFollowHandler = operation.FollowHandlerFunc(func(params operation.FollowParams) middleware.Responder {
+		api.OperationFollowHandler = operation.FollowHandlerFunc(func(params operation.FollowParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operation.Follow has not yet been implemented")
 		})
 	}
 	if api.OperationGetFeedHandler == nil {
-		api.OperationGetFeedHandler = operation.GetFeedHandlerFunc(func(params operation.GetFeedParams) middleware.Responder {
+		api.OperationGetFeedHandler = operation.GetFeedHandlerFunc(func(params operation.GetFeedParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operation.GetFeed has not yet been implemented")
 		})
 	}
@@ -56,12 +68,12 @@ func configureAPI(api *operations.TwitterMockAPI) http.Handler {
 		})
 	}
 	if api.UserLogoutUserHandler == nil {
-		api.UserLogoutUserHandler = user.LogoutUserHandlerFunc(func(params user.LogoutUserParams) middleware.Responder {
+		api.UserLogoutUserHandler = user.LogoutUserHandlerFunc(func(params user.LogoutUserParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation user.LogoutUser has not yet been implemented")
 		})
 	}
 	if api.OperationPostTweetHandler == nil {
-		api.OperationPostTweetHandler = operation.PostTweetHandlerFunc(func(params operation.PostTweetParams) middleware.Responder {
+		api.OperationPostTweetHandler = operation.PostTweetHandlerFunc(func(params operation.PostTweetParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operation.PostTweet has not yet been implemented")
 		})
 	}

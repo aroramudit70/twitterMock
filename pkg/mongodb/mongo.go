@@ -1,4 +1,4 @@
-package mongo
+package mongodb
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type mongoConfig struct {
+type Config struct {
 	Uri          string `envconfig:"DB_URI"`
-	DataBaseName string `envconfig:"DB_NANME"`
+	DataBaseName string `envconfig:"DB_NANE"`
 }
 
-func GetConnection(m mongoConfig) (*mongo.Database, error) {
+func GetConnection(m Config) (*mongo.Database, error) {
 	connection, err := mongo.NewClient(options.Client().ApplyURI(m.Uri))
 	if err != nil {
 		return nil, err

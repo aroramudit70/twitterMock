@@ -44,26 +44,32 @@ func NewTwitterMockAPI(spec *loads.Document) *TwitterMockAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
-		XMLProducer:  runtime.XMLProducer(),
 
-		OperationFollowHandler: operation.FollowHandlerFunc(func(params operation.FollowParams) middleware.Responder {
+		OperationFollowHandler: operation.FollowHandlerFunc(func(params operation.FollowParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operation.Follow has not yet been implemented")
 		}),
-		OperationGetFeedHandler: operation.GetFeedHandlerFunc(func(params operation.GetFeedParams) middleware.Responder {
+		OperationGetFeedHandler: operation.GetFeedHandlerFunc(func(params operation.GetFeedParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operation.GetFeed has not yet been implemented")
 		}),
 		UserLoginUserHandler: user.LoginUserHandlerFunc(func(params user.LoginUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation user.LoginUser has not yet been implemented")
 		}),
-		UserLogoutUserHandler: user.LogoutUserHandlerFunc(func(params user.LogoutUserParams) middleware.Responder {
+		UserLogoutUserHandler: user.LogoutUserHandlerFunc(func(params user.LogoutUserParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation user.LogoutUser has not yet been implemented")
 		}),
-		OperationPostTweetHandler: operation.PostTweetHandlerFunc(func(params operation.PostTweetParams) middleware.Responder {
+		OperationPostTweetHandler: operation.PostTweetHandlerFunc(func(params operation.PostTweetParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operation.PostTweet has not yet been implemented")
 		}),
 		UserSignupHandler: user.SignupHandlerFunc(func(params user.SignupParams) middleware.Responder {
 			return middleware.NotImplemented("operation user.Signup has not yet been implemented")
 		}),
+
+		// Applies when the "Authorization" header is set
+		BearerAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		},
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -99,9 +105,13 @@ type TwitterMockAPI struct {
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
-	// XMLProducer registers a producer for the following mime types:
-	//   - application/xml
-	XMLProducer runtime.Producer
+
+	// BearerAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	BearerAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
 
 	// OperationFollowHandler sets the operation handler for the follow operation
 	OperationFollowHandler operation.FollowHandler
@@ -191,8 +201,9 @@ func (o *TwitterMockAPI) Validate() error {
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
-	if o.XMLProducer == nil {
-		unregistered = append(unregistered, "XMLProducer")
+
+	if o.BearerAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
 	}
 
 	if o.OperationFollowHandler == nil {
@@ -228,12 +239,21 @@ func (o *TwitterMockAPI) ServeErrorFor(operationID string) func(http.ResponseWri
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *TwitterMockAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name := range schemes {
+		switch name {
+		case "Bearer":
+			scheme := schemes[name]
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.BearerAuth)
+
+		}
+	}
+	return result
 }
 
 // Authorizer returns the registered authorizer
 func (o *TwitterMockAPI) Authorizer() runtime.Authorizer {
-	return nil
+	return o.APIAuthorizer
 }
 
 // ConsumersFor gets the consumers for the specified media types.
@@ -261,8 +281,6 @@ func (o *TwitterMockAPI) ProducersFor(mediaTypes []string) map[string]runtime.Pr
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONProducer
-		case "application/xml":
-			result["application/xml"] = o.XMLProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {

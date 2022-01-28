@@ -1,6 +1,6 @@
-MODULE_NAME=twitterMock
+MODULE_NAME=twittermock
 
-GOCMD=GOCMD
+GOCMD=go
 GORUN=$(GOCMD) run
 GOINSTALL=$(GOCMD) install
 GOBUILD=$(GOCMD) build
@@ -30,9 +30,9 @@ run:
 	@test $(profile) || (echo "specify profile (profile=dev/TBD)"; exit 1)
 	bin/$(MODULE_NAME) -config=configs/$(profile).env
 
-docker:
+Docker:
 	@test $(profile) || (echo "specify profile (profile=dev/TBD)"; exit 1)
-	docker build --build-arg MODULE=$(MODULE_NAME) -f docker/$(profile)/Dockerfile -t $(MODULE_NAME)
+	docker build --build-arg MODULE=$(MODULE_NAME) -f docker/$(profile)/Dockerfile -t $(MODULE_NAME) .
 
 docker-run:
 	docker run -p 8090:8090 $(MODULE_NAME)

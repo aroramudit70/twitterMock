@@ -9,8 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"twitterMock/api/generated/models"
 )
@@ -23,14 +21,6 @@ const LoginUserOKCode int = 200
 swagger:response loginUserOK
 */
 type LoginUserOK struct {
-	/*date in UTC when token expires
-
-	 */
-	XExpiresAfter strfmt.DateTime `json:"X-Expires-After"`
-	/*calls per hour allowed by the user
-
-	 */
-	XRateLimit int32 `json:"X-Rate-Limit"`
 
 	/*
 	  In: Body
@@ -42,28 +32,6 @@ type LoginUserOK struct {
 func NewLoginUserOK() *LoginUserOK {
 
 	return &LoginUserOK{}
-}
-
-// WithXExpiresAfter adds the xExpiresAfter to the login user o k response
-func (o *LoginUserOK) WithXExpiresAfter(xExpiresAfter strfmt.DateTime) *LoginUserOK {
-	o.XExpiresAfter = xExpiresAfter
-	return o
-}
-
-// SetXExpiresAfter sets the xExpiresAfter to the login user o k response
-func (o *LoginUserOK) SetXExpiresAfter(xExpiresAfter strfmt.DateTime) {
-	o.XExpiresAfter = xExpiresAfter
-}
-
-// WithXRateLimit adds the xRateLimit to the login user o k response
-func (o *LoginUserOK) WithXRateLimit(xRateLimit int32) *LoginUserOK {
-	o.XRateLimit = xRateLimit
-	return o
-}
-
-// SetXRateLimit sets the xRateLimit to the login user o k response
-func (o *LoginUserOK) SetXRateLimit(xRateLimit int32) {
-	o.XRateLimit = xRateLimit
 }
 
 // WithPayload adds the payload to the login user o k response
@@ -80,24 +48,54 @@ func (o *LoginUserOK) SetPayload(payload string) {
 // WriteResponse to the client
 func (o *LoginUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	// response header X-Expires-After
-
-	xExpiresAfter := o.XExpiresAfter.String()
-	if xExpiresAfter != "" {
-		rw.Header().Set("X-Expires-After", xExpiresAfter)
-	}
-
-	// response header X-Rate-Limit
-
-	xRateLimit := swag.FormatInt32(o.XRateLimit)
-	if xRateLimit != "" {
-		rw.Header().Set("X-Rate-Limit", xRateLimit)
-	}
-
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
+	}
+}
+
+// LoginUserUnauthorizedCode is the HTTP code returned for type LoginUserUnauthorized
+const LoginUserUnauthorizedCode int = 401
+
+/*LoginUserUnauthorized UnAuthorized
+
+swagger:response loginUserUnauthorized
+*/
+type LoginUserUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewLoginUserUnauthorized creates LoginUserUnauthorized with default headers values
+func NewLoginUserUnauthorized() *LoginUserUnauthorized {
+
+	return &LoginUserUnauthorized{}
+}
+
+// WithPayload adds the payload to the login user unauthorized response
+func (o *LoginUserUnauthorized) WithPayload(payload *models.ErrResponse) *LoginUserUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the login user unauthorized response
+func (o *LoginUserUnauthorized) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *LoginUserUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 

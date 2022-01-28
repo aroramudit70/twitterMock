@@ -18,9 +18,6 @@ var (
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
-  "schemes": [
-    "http"
-  ],
   "swagger": "2.0",
   "info": {
     "description": "Mock of twitter for Squareboat assignment",
@@ -30,11 +27,16 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "host": "192.168.1.233",
+  "host": "192.168.1.233:8090",
   "basePath": "/mock",
   "paths": {
     "/feed": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Hear what everyone you are following wants to say",
         "produces": [
           "application/json"
@@ -44,14 +46,6 @@ func init() {
         ],
         "summary": "Get Feed of your users you are following",
         "operationId": "getFeed",
-        "parameters": [
-          {
-            "type": "string",
-            "name": "userName",
-            "in": "header",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -61,6 +55,12 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
             "schema": {
               "$ref": "#/definitions/ErrResponse"
             }
@@ -82,6 +82,11 @@ func init() {
     },
     "/follow/{userHandle}": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Follow other users to increase your social group",
         "produces": [
           "application/json"
@@ -92,12 +97,6 @@ func init() {
         "summary": "Follow other users",
         "operationId": "follow",
         "parameters": [
-          {
-            "type": "string",
-            "name": "userName",
-            "in": "header",
-            "required": true
-          },
           {
             "type": "string",
             "name": "userHandle",
@@ -114,6 +113,12 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
             "schema": {
               "$ref": "#/definitions/ErrResponse"
             }
@@ -135,6 +140,11 @@ func init() {
     },
     "/tweet": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Feature allows the user to express their emotions and thoughts about anything and everything within 240 words",
         "produces": [
           "application/json"
@@ -168,6 +178,18 @@ func init() {
               "$ref": "#/definitions/ErrResponse"
             }
           },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -180,7 +202,6 @@ func init() {
     "/user/login": {
       "get": {
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "tags": [
@@ -209,18 +230,12 @@ func init() {
             "description": "successful operation",
             "schema": {
               "type": "string"
-            },
-            "headers": {
-              "X-Expires-After": {
-                "type": "string",
-                "format": "date-time",
-                "description": "date in UTC when token expires"
-              },
-              "X-Rate-Limit": {
-                "type": "integer",
-                "format": "int32",
-                "description": "calls per hour allowed by the user"
-              }
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
             }
           },
           "404": {
@@ -240,8 +255,12 @@ func init() {
     },
     "/user/logout": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "tags": [
@@ -291,6 +310,18 @@ func init() {
               "$ref": "#/definitions/ErrResponse"
             }
           },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -333,9 +364,15 @@ func init() {
         },
         "followingList": {
           "type": "array",
+          "default": null,
           "items": {
             "type": "string"
           },
+          "readOnly": true
+        },
+        "loggedIn": {
+          "type": "boolean",
+          "default": false,
           "readOnly": true
         },
         "name": {
@@ -353,9 +390,14 @@ func init() {
     "Tweet": {
       "type": "object",
       "properties": {
+        "time": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
         "tweet": {
           "type": "string",
-          "maxLength": 280
+          "maxLength": 1000
         },
         "userName": {
           "type": "string",
@@ -365,19 +407,10 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "api_key": {
+    "Bearer": {
       "type": "apiKey",
-      "name": "api_key",
+      "name": "Authorization",
       "in": "header"
-    },
-    "petstore_auth": {
-      "type": "oauth2",
-      "flow": "implicit",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "scopes": {
-        "read:pets": "read your pets",
-        "write:pets": "modify pets in your account"
-      }
     }
   },
   "tags": [
@@ -392,9 +425,6 @@ func init() {
   ]
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
-  "schemes": [
-    "http"
-  ],
   "swagger": "2.0",
   "info": {
     "description": "Mock of twitter for Squareboat assignment",
@@ -404,11 +434,16 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "host": "192.168.1.233",
+  "host": "192.168.1.233:8090",
   "basePath": "/mock",
   "paths": {
     "/feed": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Hear what everyone you are following wants to say",
         "produces": [
           "application/json"
@@ -418,14 +453,6 @@ func init() {
         ],
         "summary": "Get Feed of your users you are following",
         "operationId": "getFeed",
-        "parameters": [
-          {
-            "type": "string",
-            "name": "userName",
-            "in": "header",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -435,6 +462,12 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
             "schema": {
               "$ref": "#/definitions/ErrResponse"
             }
@@ -456,6 +489,11 @@ func init() {
     },
     "/follow/{userHandle}": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Follow other users to increase your social group",
         "produces": [
           "application/json"
@@ -466,12 +504,6 @@ func init() {
         "summary": "Follow other users",
         "operationId": "follow",
         "parameters": [
-          {
-            "type": "string",
-            "name": "userName",
-            "in": "header",
-            "required": true
-          },
           {
             "type": "string",
             "name": "userHandle",
@@ -488,6 +520,12 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
             "schema": {
               "$ref": "#/definitions/ErrResponse"
             }
@@ -509,6 +547,11 @@ func init() {
     },
     "/tweet": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Feature allows the user to express their emotions and thoughts about anything and everything within 240 words",
         "produces": [
           "application/json"
@@ -542,6 +585,18 @@ func init() {
               "$ref": "#/definitions/ErrResponse"
             }
           },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -554,8 +609,7 @@ func init() {
     "/user/login": {
       "get": {
         "produces": [
-          "application/json",
-          "application/xml"
+          "application/json"
         ],
         "tags": [
           "user"
@@ -583,18 +637,12 @@ func init() {
             "description": "successful operation",
             "schema": {
               "type": "string"
-            },
-            "headers": {
-              "X-Expires-After": {
-                "type": "string",
-                "format": "date-time",
-                "description": "date in UTC when token expires"
-              },
-              "X-Rate-Limit": {
-                "type": "integer",
-                "format": "int32",
-                "description": "calls per hour allowed by the user"
-              }
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
             }
           },
           "404": {
@@ -614,9 +662,13 @@ func init() {
     },
     "/user/logout": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
-          "application/json",
-          "application/xml"
+          "application/json"
         ],
         "tags": [
           "user"
@@ -665,6 +717,18 @@ func init() {
               "$ref": "#/definitions/ErrResponse"
             }
           },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -707,9 +771,15 @@ func init() {
         },
         "followingList": {
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
+          "readOnly": true
+        },
+        "loggedIn": {
+          "type": "boolean",
+          "default": false,
           "readOnly": true
         },
         "name": {
@@ -727,9 +797,14 @@ func init() {
     "Tweet": {
       "type": "object",
       "properties": {
+        "time": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
         "tweet": {
           "type": "string",
-          "maxLength": 280
+          "maxLength": 1000
         },
         "userName": {
           "type": "string",
@@ -739,19 +814,10 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "api_key": {
+    "Bearer": {
       "type": "apiKey",
-      "name": "api_key",
+      "name": "Authorization",
       "in": "header"
-    },
-    "petstore_auth": {
-      "type": "oauth2",
-      "flow": "implicit",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "scopes": {
-        "read:pets": "read your pets",
-        "write:pets": "modify pets in your account"
-      }
     }
   },
   "tags": [

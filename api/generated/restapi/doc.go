@@ -5,7 +5,7 @@
 //  Mock of twitter for Squareboat assignment
 //  Schemes:
 //    http
-//  Host: 192.168.1.233
+//  Host: 192.168.1.233:8090
 //  BasePath: /mock
 //  Version: 1.0.0
 //  Contact: <aroramudit70@gmail.com>
@@ -15,7 +15,6 @@
 //
 //  Produces:
 //    - application/json
-//    - application/xml
 //
 // swagger:meta
 package restapi

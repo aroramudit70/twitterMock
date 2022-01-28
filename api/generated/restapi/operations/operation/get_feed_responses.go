@@ -104,6 +104,50 @@ func (o *GetFeedBadRequest) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
+// GetFeedUnauthorizedCode is the HTTP code returned for type GetFeedUnauthorized
+const GetFeedUnauthorizedCode int = 401
+
+/*GetFeedUnauthorized UnAuthorized
+
+swagger:response getFeedUnauthorized
+*/
+type GetFeedUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewGetFeedUnauthorized creates GetFeedUnauthorized with default headers values
+func NewGetFeedUnauthorized() *GetFeedUnauthorized {
+
+	return &GetFeedUnauthorized{}
+}
+
+// WithPayload adds the payload to the get feed unauthorized response
+func (o *GetFeedUnauthorized) WithPayload(payload *models.ErrResponse) *GetFeedUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get feed unauthorized response
+func (o *GetFeedUnauthorized) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetFeedUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetFeedNotFoundCode is the HTTP code returned for type GetFeedNotFound
 const GetFeedNotFoundCode int = 404
 

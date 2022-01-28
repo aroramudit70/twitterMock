@@ -19,8 +19,13 @@ import (
 // swagger:model Tweet
 type Tweet struct {
 
+	// time
+	// Read Only: true
+	// Format: date-time
+	Time strfmt.DateTime `json:"time,omitempty"`
+
 	// tweet
-	// Max Length: 280
+	// Max Length: 1000
 	Tweet string `json:"tweet,omitempty"`
 
 	// user name
@@ -32,6 +37,10 @@ type Tweet struct {
 func (m *Tweet) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateTime(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateTweet(formats); err != nil {
 		res = append(res, err)
 	}
@@ -42,12 +51,24 @@ func (m *Tweet) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Tweet) validateTime(formats strfmt.Registry) error {
+	if swag.IsZero(m.Time) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("time", "body", "date-time", m.Time.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Tweet) validateTweet(formats strfmt.Registry) error {
 	if swag.IsZero(m.Tweet) { // not required
 		return nil
 	}
 
-	if err := validate.MaxLength("tweet", "body", m.Tweet, 280); err != nil {
+	if err := validate.MaxLength("tweet", "body", m.Tweet, 1000); err != nil {
 		return err
 	}
 
@@ -58,6 +79,10 @@ func (m *Tweet) validateTweet(formats strfmt.Registry) error {
 func (m *Tweet) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.contextValidateTime(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.contextValidateUserName(ctx, formats); err != nil {
 		res = append(res, err)
 	}
@@ -65,6 +90,15 @@ func (m *Tweet) ContextValidate(ctx context.Context, formats strfmt.Registry) er
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Tweet) contextValidateTime(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "time", "body", strfmt.DateTime(m.Time)); err != nil {
+		return err
+	}
+
 	return nil
 }
 

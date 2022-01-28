@@ -99,6 +99,94 @@ func (o *PostTweetBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// PostTweetUnauthorizedCode is the HTTP code returned for type PostTweetUnauthorized
+const PostTweetUnauthorizedCode int = 401
+
+/*PostTweetUnauthorized UnAuthorized
+
+swagger:response postTweetUnauthorized
+*/
+type PostTweetUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewPostTweetUnauthorized creates PostTweetUnauthorized with default headers values
+func NewPostTweetUnauthorized() *PostTweetUnauthorized {
+
+	return &PostTweetUnauthorized{}
+}
+
+// WithPayload adds the payload to the post tweet unauthorized response
+func (o *PostTweetUnauthorized) WithPayload(payload *models.ErrResponse) *PostTweetUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post tweet unauthorized response
+func (o *PostTweetUnauthorized) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostTweetUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// PostTweetNotFoundCode is the HTTP code returned for type PostTweetNotFound
+const PostTweetNotFoundCode int = 404
+
+/*PostTweetNotFound Not Found
+
+swagger:response postTweetNotFound
+*/
+type PostTweetNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewPostTweetNotFound creates PostTweetNotFound with default headers values
+func NewPostTweetNotFound() *PostTweetNotFound {
+
+	return &PostTweetNotFound{}
+}
+
+// WithPayload adds the payload to the post tweet not found response
+func (o *PostTweetNotFound) WithPayload(payload *models.ErrResponse) *PostTweetNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post tweet not found response
+func (o *PostTweetNotFound) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostTweetNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PostTweetInternalServerErrorCode is the HTTP code returned for type PostTweetInternalServerError
 const PostTweetInternalServerErrorCode int = 500
 

@@ -99,6 +99,94 @@ func (o *SignupBadRequest) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// SignupUnauthorizedCode is the HTTP code returned for type SignupUnauthorized
+const SignupUnauthorizedCode int = 401
+
+/*SignupUnauthorized UnAuthorized
+
+swagger:response signupUnauthorized
+*/
+type SignupUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewSignupUnauthorized creates SignupUnauthorized with default headers values
+func NewSignupUnauthorized() *SignupUnauthorized {
+
+	return &SignupUnauthorized{}
+}
+
+// WithPayload adds the payload to the signup unauthorized response
+func (o *SignupUnauthorized) WithPayload(payload *models.ErrResponse) *SignupUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the signup unauthorized response
+func (o *SignupUnauthorized) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *SignupUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// SignupConflictCode is the HTTP code returned for type SignupConflict
+const SignupConflictCode int = 409
+
+/*SignupConflict Conflict
+
+swagger:response signupConflict
+*/
+type SignupConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewSignupConflict creates SignupConflict with default headers values
+func NewSignupConflict() *SignupConflict {
+
+	return &SignupConflict{}
+}
+
+// WithPayload adds the payload to the signup conflict response
+func (o *SignupConflict) WithPayload(payload *models.ErrResponse) *SignupConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the signup conflict response
+func (o *SignupConflict) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *SignupConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // SignupInternalServerErrorCode is the HTTP code returned for type SignupInternalServerError
 const SignupInternalServerErrorCode int = 500
 

@@ -99,6 +99,50 @@ func (o *FollowBadRequest) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// FollowUnauthorizedCode is the HTTP code returned for type FollowUnauthorized
+const FollowUnauthorizedCode int = 401
+
+/*FollowUnauthorized UnAuthorized
+
+swagger:response followUnauthorized
+*/
+type FollowUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.ErrResponse `json:"body,omitempty"`
+}
+
+// NewFollowUnauthorized creates FollowUnauthorized with default headers values
+func NewFollowUnauthorized() *FollowUnauthorized {
+
+	return &FollowUnauthorized{}
+}
+
+// WithPayload adds the payload to the follow unauthorized response
+func (o *FollowUnauthorized) WithPayload(payload *models.ErrResponse) *FollowUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the follow unauthorized response
+func (o *FollowUnauthorized) SetPayload(payload *models.ErrResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *FollowUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // FollowNotFoundCode is the HTTP code returned for type FollowNotFound
 const FollowNotFoundCode int = 404
 
